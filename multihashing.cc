@@ -26,6 +26,7 @@ extern "C" {
 }
 
 #include "boolberry.h"
+#include "cn_heavy/cn_slow_hash.hpp"
 
 using namespace node;
 using namespace v8;
@@ -429,6 +430,37 @@ Handle<Value> cryptonight(const Arguments& args) {
     return scope.Close(buff->handle_);
 }
 
+Handle<Value> cryptonight_heavy(const Arguments& args) {
+    HandleScope scope;
+
+    if (args.Length() < 1)
+        return except("You must provide one argument.");
+
+    Local<Object> target = args[0]->ToObject();
+	
+    if(!Buffer::HasInstance(target))
+        return except("Argument should be a buffer object.");
+
+    char * input = Buffer::Data(target);
+    char output[32];
+    
+    uint32_t input_len = Buffer::Length(target);
+
+    if(input_len == 0 || input[0] >= 0x04)
+    {
+        cn_heavy::cn_pow_hash_v2 ctx;
+        ctx.hash(input, input_len, output);
+    }
+    else
+    {
+        cn_heavy::cn_pow_hash_v1 ctx;
+        ctx.hash(input, input_len, output);
+    }
+
+    Buffer* buff = Buffer::New(output, 32);
+    return scope.Close(buff->handle_);
+}
+
 Handle<Value> x13(const Arguments& args) {
     HandleScope scope;
 
@@ -591,6 +623,7 @@ void init(Handle<Object> exports) {
     exports->Set(String::NewSymbol("hefty1"), FunctionTemplate::New(hefty1)->GetFunction());
     exports->Set(String::NewSymbol("shavite3"), FunctionTemplate::New(shavite3)->GetFunction());
     exports->Set(String::NewSymbol("cryptonight"), FunctionTemplate::New(cryptonight)->GetFunction());
+    exports->Set(String::NewSymbol("cryptonight_heavy"), FunctionTemplate::New(cryptonight_heavy)->GetFunction());
     exports->Set(String::NewSymbol("x13"), FunctionTemplate::New(x13)->GetFunction());
     exports->Set(String::NewSymbol("boolberry"), FunctionTemplate::New(boolberry)->GetFunction());
     exports->Set(String::NewSymbol("nist5"), FunctionTemplate::New(nist5)->GetFunction());
