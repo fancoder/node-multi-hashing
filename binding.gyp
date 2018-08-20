@@ -50,12 +50,14 @@
                 "crypto/hash.c",
                 "crypto/aesb.c",
                 "crypto/wild_keccak.cpp",
+				"cn_heavy/cn_slow_hash_hard_intel.cpp",
+                "cn_heavy/cn_slow_hash_soft.cpp",
             ],
             "include_dirs": [
                 "crypto",
             ],
             "cflags_cc": [
-                "-std=c++0x"
+                "-std=c++11"
             ],
         }
     ]
